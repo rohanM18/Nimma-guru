@@ -1,0 +1,129 @@
+Build a modern mobile-first Progressive Web App (PWA) called "NimmaGuru" using Next.js 15, React, TypeScript, Tailwind CSS, shadcn/ui, and Framer Motion.
+
+The app is a rural community mentorship platform connecting students and parents with retired teachers, engineers, and professionals across Karnataka.
+
+The app should feel like a real Android mobile application when opened on phone.
+
+Requirements:
+
+- Fully responsive mobile-first UI
+- Installable PWA
+- Smooth animations
+- Clean modern UI
+- Material 3 inspired design
+- Bottom navigation like mobile apps
+- Soft gradients and accessible spacing
+- Kannada + English language toggle UI
+- Use mock data only
+- No backend required
+- No Firebase required
+- Use local JSON/mock state only
+
+Brand Identity:
+- Name: NimmaGuru
+- Theme: rural mentorship + community learning
+- Tone: warm, trustworthy, modern, educational
+- Colors: soft green, cream, white, muted earthy tones
+
+Main Features and Screens:
+
+1. Splash Screen
+- App logo
+- Tagline:
+  "Village mentorship through Gyaan-Daan"
+- Smooth animated entry
+
+2. Role Selection Screen
+- Two large cards:
+  - Learn (Student/Parent)
+  - Teach (Guru/Mentor)
+- Mobile-app style interaction
+
+3. Mock Authentication Screen
+- Fake Google sign-in button
+- Fake phone OTP button
+- No real auth logic required
+
+4. Student Profile Screen
+Fields:
+- Full name
+- Age
+- School
+- Bio
+- Interests
+- Preferred subjects
+- Village
+
+5. Guru Profile Screen
+Fields:
+- Full name
+- Former profession
+- Experience
+- Subjects
+- Availability
+- Bio
+- Pinned location
+- WhatsApp CTA button
+
+6. Guru Discovery Screen
+Show multiple mentor cards with:
+- Name
+- Former profession
+- Subjects
+- Rating
+- Village
+- Short description
+- WhatsApp button
+- Directions button
+- Book session button
+
+7. Session Calendar Screen
+- Upcoming sessions
+- Mock booking cards
+- Date/time/location display
+- Book button
+
+8. Booked Sessions Screen
+- Show booked classes
+- Session cards
+- Directions CTA
+
+9. Appreciation Wall
+- Students can post thank-you notes
+- Show beautiful gratitude cards
+- Community-focused design
+
+10. Bottom Navigation
+Tabs:
+- Gurus
+- Calendar
+- Bookings
+- Thanks
+- Profile
+
+11. Settings Screen
+- Kannada/English toggle
+- Dark/light mode toggle
+- Accessibility text sizing UI
+
+Technical Requirements:
+- Use App Router
+- Use TypeScript everywhere
+- Use reusable components
+- Create realistic mock JSON data
+- Use Framer Motion transitions
+- Add installable PWA support
+- Generate proper mobile app feeling
+- Add app icon + splash screen
+- Use modern clean card layouts
+- Add loading skeletons
+- Add realistic spacing and shadows
+
+Design Direction:
+The UI should feel like a premium social-impact startup app focused on education and rural empowerment.
+
+Do NOT make it look like a generic admin dashboard.
+
+It should feel warm, emotional, and community-driven while remaining modern and minimal.
+
+The app should look excellent on mobile devices and should be demo-ready for an academic internship presentation.
