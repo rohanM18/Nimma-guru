@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 
-import { APPRECIATIONS, Appreciation, BookedSession, GURUS, INITIAL_BOOKINGS } from "@/data/mockData";
+import { APPRECIATIONS, Appreciation, BookedSession, INITIAL_BOOKINGS } from "@/data/mockData";
 
 export type Role = "student" | "guru" | null;
 export type Language = "en" | "kn";
@@ -34,11 +34,27 @@ export interface GuruProfile {
   whatsapp: string;
 }
 
+export interface CurrentUser {
+  name: string;
+  email: string;
+}
+
+export interface Review {
+  id: string;
+  guruId: string;
+  reviewerName: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
 interface AppContextType {
   role: Role;
   setRole: (role: Role) => void;
   isOnboarded: boolean;
   setIsOnboarded: (v: boolean) => void;
+  currentUser: CurrentUser | null;
+  setCurrentUser: (u: CurrentUser) => void;
   studentProfile: StudentProfile;
   setStudentProfile: (p: StudentProfile) => void;
   guruProfile: GuruProfile;
@@ -52,6 +68,9 @@ interface AppContextType {
   removeBooking: (id: string) => void;
   appreciations: Appreciation[];
   addAppreciation: (a: Appreciation) => void;
+  reviews: Record<string, Review[]>;
+  addReview: (guruId: string, review: Review) => void;
+  logout: () => Promise<void>;
   t: (key: string) => string;
 }
 
@@ -166,84 +185,59 @@ const translations: Record<Language, Record<string, string>> = {
   },
 };
 
-const defaultStudent: StudentProfile = {
-  fullName: "",
-  age: "",
-  school: "",
-  village: "",
-  bio: "",
-  interests: "",
-  subjects: "",
-};
-
-const defaultGuru: GuruProfile = {
-  fullName: "",
-  profession: "",
-  experience: "",
-  subjects: "",
-  availability: "",
-  bio: "",
-  village: "",
-  whatsapp: "",
-};
+const defaultStudent: StudentProfile = { fullName: "", age: "", school: "", village: "", bio: "", interests: "", subjects: "" };
+const defaultGuru: GuruProfile = { fullName: "", profession: "", experience: "", subjects: "", availability: "", bio: "", village: "", whatsapp: "" };
 
 const AppContext = createContext<AppContextType>({
-  role: null,
-  setRole: () => {},
-  isOnboarded: false,
-  setIsOnboarded: () => {},
-  studentProfile: defaultStudent,
-  setStudentProfile: () => {},
-  guruProfile: defaultGuru,
-  setGuruProfile: () => {},
-  language: "en",
-  setLanguage: () => {},
-  textSize: "normal",
-  setTextSize: () => {},
-  bookings: [],
-  addBooking: () => {},
-  removeBooking: () => {},
-  appreciations: [],
-  addAppreciation: () => {},
+  role: null, setRole: () => {}, isOnboarded: false, setIsOnboarded: () => {},
+  currentUser: null, setCurrentUser: () => {},
+  studentProfile: defaultStudent, setStudentProfile: () => {},
+  guruProfile: defaultGuru, setGuruProfile: () => {},
+  language: "en", setLanguage: () => {},
+  textSize: "normal", setTextSize: () => {},
+  bookings: [], addBooking: () => {}, removeBooking: () => {},
+  appreciations: [], addAppreciation: () => {},
+  reviews: {}, addReview: () => {},
+  logout: async () => {},
   t: (k) => k,
 });
 
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [role, setRoleState] = useState<Role>(null);
   const [isOnboarded, setIsOnboardedState] = useState(false);
+  const [currentUser, setCurrentUserState] = useState<CurrentUser | null>(null);
   const [studentProfile, setStudentProfileState] = useState<StudentProfile>(defaultStudent);
   const [guruProfile, setGuruProfileState] = useState<GuruProfile>(defaultGuru);
   const [language, setLanguageState] = useState<Language>("en");
   const [textSize, setTextSizeState] = useState<TextSize>("normal");
   const [bookings, setBookings] = useState<BookedSession[]>(INITIAL_BOOKINGS);
   const [appreciations, setAppreciations] = useState<Appreciation[]>(APPRECIATIONS);
+  const [reviews, setReviews] = useState<Record<string, Review[]>>({});
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    async function loadState() {
+    async function load() {
       try {
-        const [onboarded, savedRole, savedLang, savedSize, savedBookings, savedAppreciations, savedStudent, savedGuru] = await Promise.all([
-          AsyncStorage.getItem("isOnboarded"),
-          AsyncStorage.getItem("role"),
-          AsyncStorage.getItem("language"),
-          AsyncStorage.getItem("textSize"),
-          AsyncStorage.getItem("bookings"),
-          AsyncStorage.getItem("appreciations"),
-          AsyncStorage.getItem("studentProfile"),
-          AsyncStorage.getItem("guruProfile"),
+        const vals = await AsyncStorage.multiGet([
+          "isOnboarded", "role", "language", "textSize",
+          "bookings", "appreciations", "studentProfile", "guruProfile",
+          "currentUser", "reviews",
         ]);
-        if (onboarded === "true") setIsOnboardedState(true);
-        if (savedRole) setRoleState(savedRole as Role);
-        if (savedLang) setLanguageState(savedLang as Language);
-        if (savedSize) setTextSizeState(savedSize as TextSize);
-        if (savedBookings) setBookings(JSON.parse(savedBookings));
-        if (savedAppreciations) setAppreciations(JSON.parse(savedAppreciations));
-        if (savedStudent) setStudentProfileState(JSON.parse(savedStudent));
-        if (savedGuru) setGuruProfileState(JSON.parse(savedGuru));
+        const map = Object.fromEntries(vals);
+        if (map.isOnboarded === "true") setIsOnboardedState(true);
+        if (map.role) setRoleState(map.role as Role);
+        if (map.language) setLanguageState(map.language as Language);
+        if (map.textSize) setTextSizeState(map.textSize as TextSize);
+        if (map.bookings) setBookings(JSON.parse(map.bookings));
+        if (map.appreciations) setAppreciations(JSON.parse(map.appreciations));
+        if (map.studentProfile) setStudentProfileState(JSON.parse(map.studentProfile));
+        if (map.guruProfile) setGuruProfileState(JSON.parse(map.guruProfile));
+        if (map.currentUser) setCurrentUserState(JSON.parse(map.currentUser));
+        if (map.reviews) setReviews(JSON.parse(map.reviews));
       } catch {}
       setLoaded(true);
     }
-    loadState();
+    load();
   }, []);
 
   const setRole = useCallback(async (r: Role) => {
@@ -254,6 +248,11 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   const setIsOnboarded = useCallback(async (v: boolean) => {
     setIsOnboardedState(v);
     await AsyncStorage.setItem("isOnboarded", String(v));
+  }, []);
+
+  const setCurrentUser = useCallback(async (u: CurrentUser) => {
+    setCurrentUserState(u);
+    await AsyncStorage.setItem("currentUser", JSON.stringify(u));
   }, []);
 
   const setStudentProfile = useCallback(async (p: StudentProfile) => {
@@ -276,28 +275,35 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
     await AsyncStorage.setItem("textSize", s);
   }, []);
 
-  const addBooking = useCallback(async (b: BookedSession) => {
-    setBookings((prev) => {
-      const next = [b, ...prev];
-      AsyncStorage.setItem("bookings", JSON.stringify(next));
+  const addBooking = useCallback((b: BookedSession) => {
+    setBookings((prev) => { const next = [b, ...prev]; AsyncStorage.setItem("bookings", JSON.stringify(next)); return next; });
+  }, []);
+
+  const removeBooking = useCallback((id: string) => {
+    setBookings((prev) => { const next = prev.filter((b) => b.id !== id); AsyncStorage.setItem("bookings", JSON.stringify(next)); return next; });
+  }, []);
+
+  const addAppreciation = useCallback((a: Appreciation) => {
+    setAppreciations((prev) => { const next = [a, ...prev]; AsyncStorage.setItem("appreciations", JSON.stringify(next)); return next; });
+  }, []);
+
+  const addReview = useCallback((guruId: string, review: Review) => {
+    setReviews((prev) => {
+      const existing = prev[guruId] ?? [];
+      const next = { ...prev, [guruId]: [review, ...existing] };
+      AsyncStorage.setItem("reviews", JSON.stringify(next));
       return next;
     });
   }, []);
 
-  const removeBooking = useCallback(async (id: string) => {
-    setBookings((prev) => {
-      const next = prev.filter((b) => b.id !== id);
-      AsyncStorage.setItem("bookings", JSON.stringify(next));
-      return next;
-    });
-  }, []);
-
-  const addAppreciation = useCallback(async (a: Appreciation) => {
-    setAppreciations((prev) => {
-      const next = [a, ...prev];
-      AsyncStorage.setItem("appreciations", JSON.stringify(next));
-      return next;
-    });
+  const logout = useCallback(async () => {
+    await AsyncStorage.multiRemove(["isOnboarded", "role", "currentUser", "studentProfile", "guruProfile", "bookings"]);
+    setIsOnboardedState(false);
+    setRoleState(null);
+    setCurrentUserState(null);
+    setStudentProfileState(defaultStudent);
+    setGuruProfileState(defaultGuru);
+    setBookings(INITIAL_BOOKINGS);
   }, []);
 
   const t = useCallback((key: string): string => {
@@ -307,28 +313,16 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   if (!loaded) return null;
 
   return (
-    <AppContext.Provider
-      value={{
-        role,
-        setRole,
-        isOnboarded,
-        setIsOnboarded,
-        studentProfile,
-        setStudentProfile,
-        guruProfile,
-        setGuruProfile,
-        language,
-        setLanguage,
-        textSize,
-        setTextSize,
-        bookings,
-        addBooking,
-        removeBooking,
-        appreciations,
-        addAppreciation,
-        t,
-      }}
-    >
+    <AppContext.Provider value={{
+      role, setRole, isOnboarded, setIsOnboarded,
+      currentUser, setCurrentUser,
+      studentProfile, setStudentProfile, guruProfile, setGuruProfile,
+      language, setLanguage, textSize, setTextSize,
+      bookings, addBooking, removeBooking,
+      appreciations, addAppreciation,
+      reviews, addReview,
+      logout, t,
+    }}>
       {children}
     </AppContext.Provider>
   );
