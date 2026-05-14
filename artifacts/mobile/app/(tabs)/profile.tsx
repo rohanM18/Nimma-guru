@@ -51,23 +51,29 @@ export default function ProfileScreen() {
     ? name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
     : isGuru ? "G" : "S";
 
+  async function handleLogout() {
+    await logout();
+    router.replace("/onboarding");
+  }
+
   function confirmLogout() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
-      "Log Out",
-      "Are you sure you want to log out?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Log Out",
-          style: "destructive",
-          onPress: async () => {
-            await logout();
-            router.replace("/onboarding");
+    if (Platform.OS === "web") {
+      handleLogout();
+    } else {
+      Alert.alert(
+        "Log Out",
+        "Are you sure you want to log out?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Log Out",
+            style: "destructive",
+            onPress: handleLogout,
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   }
 
   return (
