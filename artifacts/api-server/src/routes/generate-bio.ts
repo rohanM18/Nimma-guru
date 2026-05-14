@@ -31,7 +31,7 @@ router.post("/generate-bio", async (req: any, res: any) => {
       : `Write a brief 2-sentence bio for a student named ${name || "a student"} from ${village || "Karnataka"} who is interested in learning ${subjects || "various subjects"}. Write in first person. Keep it warm, enthusiastic, and hopeful.`;
 
   try {
-    const response = await fetch(`${baseUrl}/chat/completions`, {
+    const response: any = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
