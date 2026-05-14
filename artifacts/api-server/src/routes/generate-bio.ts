@@ -2,7 +2,7 @@ import { Router } from "express";
 
 const router = Router();
 
-router.post("/generate-bio", async (req, res) => {
+router.post("/generate-bio", async (req: any, res: any) => {
   const { role, name, village, profession, subjects, experience } = req.body as {
     role: string;
     name: string;
@@ -16,7 +16,12 @@ router.post("/generate-bio", async (req, res) => {
   const apiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
 
   if (!baseUrl || !apiKey) {
-    res.status(503).json({ error: "AI service not configured" });
+    // Return a mock bio if AI is not configured, instead of 503 error
+    const mockBio = role === "guru"
+      ? `I am ${name || "a mentor"} from ${village || "Karnataka"}. I have ${experience || "many years"} of experience teaching ${subjects || "various subjects"}. I am passionate about helping rural students through NimmaGuru.`
+      : `I am ${name || "a student"} from ${village || "Karnataka"}. I am excited to learn ${subjects || "various subjects"} and grow my knowledge with my mentors.`;
+    
+    res.json({ bio: mockBio });
     return;
   }
 
