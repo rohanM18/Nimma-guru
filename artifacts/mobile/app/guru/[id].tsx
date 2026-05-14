@@ -63,14 +63,14 @@ export default function GuruDetailScreen() {
   const guruReviews = reviews[guru.id] ?? [];
 
   function handleWhatsApp() {
-    const number = guru.whatsapp.replace(/\s+/g, "");
-    const url = `https://wa.me/${number.replace("+", "")}?text=Hello ${guru.name}, I found you on NimmaGuru.`;
+    const number = guru!.whatsapp.replace(/\s+/g, "");
+    const url = `https://wa.me/${number.replace("+", "")}?text=Hello ${guru!.name}, I found you on NimmaGuru.`;
     Linking.openURL(url).catch(() => Alert.alert("Cannot open WhatsApp"));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 
   function handleDirections() {
-    const query = encodeURIComponent(`${guru.village}, ${guru.district}, Karnataka`);
+    const query = encodeURIComponent(`${guru!.village}, ${guru!.district}, Karnataka`);
     const url = Platform.select({
       ios: `maps:?q=${query}`,
       android: `geo:0,0?q=${query}`,
@@ -83,25 +83,25 @@ export default function GuruDetailScreen() {
   function handleBook() {
     if (isBooked) return;
     addBooking({
-      id: `bk-${guru.id}-${Date.now()}`,
-      guruId: guru.id,
-      guruName: guru.name,
-      subject: guru.subjects[0],
+      id: `bk-${guru!.id}-${Date.now()}`,
+      guruId: guru!.id,
+      guruName: guru!.name,
+      subject: guru!.subjects[0],
       date: "Fri, 20 Jun 2026",
       time: "4:00 PM",
-      location: `${guru.village}, ${guru.district}`,
+      location: `${guru!.village}, ${guru!.district}`,
       status: "upcoming",
-      guruInitials: guru.initials,
-      guruAvatarColor: guru.avatarColor,
+      guruInitials: guru!.initials,
+      guruAvatarColor: guru!.avatarColor,
     });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }
 
   function submitReview() {
     if (!comment.trim() || !reviewerName.trim()) return;
-    addReview(guru.id, {
-      id: `rev-${guru.id}-${Date.now()}`,
-      guruId: guru.id,
+    addReview(guru!.id, {
+      id: `rev-${guru!.id}-${Date.now()}`,
+      guruId: guru!.id,
       reviewerName: reviewerName.trim(),
       rating: starRating,
       comment: comment.trim(),
