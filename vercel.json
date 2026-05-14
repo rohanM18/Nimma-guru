@@ -21,7 +21,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "artifacts/mobile/dist/$1"
+      "destination": "/$1"
     }
   ]
 }
