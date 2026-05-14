@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import healthRouter from "./health";
-import generateBioRouter from "./generate-bio";
+import healthRouter from "./health.js";
+import generateBioRouter from "./generate-bio.js";
 
 const router: IRouter = Router();
 
